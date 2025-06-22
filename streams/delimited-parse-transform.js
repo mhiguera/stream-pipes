@@ -3,9 +3,9 @@ import LineReader from './line-reader.js'
 const DEFAULT_DELIMITER = ','
 
 export default class DelimitedToObjectTransform extends LineReader {
-  constructor(options = {}) {
-    super({ objectMode: true })
-    this.delimiter = options.delimiter || DEFAULT_DELIMITER
+  constructor(delimiter = DEFAULT_DELIMITER, options = {}) {
+    super({ objectMode: true, ...options })
+    this.delimiter = delimiter
     this.regex = new RegExp(`(?:^|${this.delimiter})(?:"([^"]*(?:""[^"]*)*)"|([^${this.delimiter}]*))`, 'g')
   }
 

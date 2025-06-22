@@ -37,7 +37,7 @@ import {
 
 await pipeline(
   createFileReader('./data.csv.gz'),
-  createDelimitedParseTransform({ delimiter: ',' }),
+  createDelimitedParseTransform(),
   createMapTransform((obj) => ({ ...obj, processed: true })),
   createTapTransform(() => console.log('Processed!')),
   createBatchStream(10),
@@ -50,20 +50,20 @@ await pipeline(
 
 ### Summary
 
-| Function                                       | Description                                      | Input                   | Output                         |
-| ---------------------------------------------- | ------------------------------------------------ | ----------------------- | ------------------------------ |
-| `createFileReader(path)`                       | Reads a file (gzip supported)                    | File content            | Stream of chunks               |
-| `createFileWriter(path)`                       | Writes chunks to a file (gzip supported)         | `"..."` (string/buffer) | Writes raw data                |
-| `createLineReader()`                           | Splits text stream by lines                      | Stream of text chunks   | One line per chunk (string)    |
-| `createLineWriter()`                           | Writes each string with a trailing newline       | `"..."` (string)        | One line per write             |
-| `createDelimitedParseTransform({ delimiter })` | Parses delimited text into objects               | `"name,age\nAlice,30"`  | `{ name: "Alice", age: "30" }` |
-| `createMapTransform(fn)`                       | Applies a custom function to each object         | `{ name: "Alice" }`     | `fn({ name: "Alice" })`        |
-| `createBatchStream(size)`                      | Groups objects into fixed-size arrays            | `{...}, {...}`          | `[ {...}, {...}, {...} ]`      |
-| `createJsonTransform()`                        | Converts each object to JSON string with newline | `{ name: "Alice" }`     | `"{"name":"Alice"}\n"`         |
-| `createTapTransform(fn)`                       | Runs a side-effect function per object           | `{ name: "Alice" }`     | `{ name: "Alice" }`            |
+| Function                                            | Description                                      | Input                   | Output                         |
+| ----------------------------------------------------| ------------------------------------------------ | ----------------------- | ------------------------------ |
+| `createFileReader(path, options)`                   | Reads a file (gzip supported)                    | File content            | Stream of chunks               |
+| `createFileWriter(path, options)`                   | Writes chunks to a file (gzip supported)         | `"..."` (string/buffer) | Writes raw data                |
+| `createLineReader(options)`                         | Splits text stream by lines                      | Stream of text chunks   | One line per chunk (string)    |
+| `createLineWriter(options)`                         | Writes each string with a trailing newline       | `"..."` (string)        | One line per write             |
+| `createDelimitedParseTransform(delimiter, options)` | Parses delimited text into objects               | `"name,age\nAlice,30"`  | `{ name: "Alice", age: "30" }` |
+| `createMapTransform(fn, options)`                   | Applies a custom function to each object         | `{ name: "Alice" }`     | `fn({ name: "Alice" })`        |
+| `createBatchStream(size, options)`                  | Groups objects into fixed-size arrays            | `{...}, {...}`          | `[ {...}, {...}, {...} ]`      |
+| `createJsonTransform(options)`                      | Converts each object to JSON string with newline | `{ name: "Alice" }`     | `"{"name":"Alice"}\n"`         |
+| `createTapTransform(fn, options)`                   | Runs a side-effect function per object           | `{ name: "Alice" }`     | `{ name: "Alice" }`            |
 
 
-### `createFileReader(path)`
+### `createFileReader(path, options)`
 
 Creates a readable stream from a file. If the path ends with `.gz`, it's automatically decompressed.
 
@@ -74,7 +74,7 @@ const textStream = createFileReader('file.txt')
 const gzipStream = createFileReader('file.txt.gz')
 ```
 
-### `createFileWriter(path)`
+### `createFileWriter(path, options)`
 Creates a writable stream to a file. If the path ends with `.gz`, the stream automatically compresses the output using Gzip.
 
 ```js
@@ -84,7 +84,7 @@ const writer = createFileWriter('output.txt')     // writes plain text lines
 const gzipWriter = createFileWriter('output.txt.gz') // compresses with gzip
 ```
 
-### `createLineReader`
+### `createLineReader(options)`
 Returns a transform stream that splits incoming text by newlines.
 
 ```js
@@ -92,7 +92,7 @@ import { createLineReader } from 'stream-pipes'
 
 source.pipe(createLineReader()).on('data', console.log)
 ```
-### `createLineWriter`
+### `createLineWriter(options)`
 Returns a transform stream that splits incoming text by newlines.
 
 ```js
@@ -101,16 +101,16 @@ import { createLineWriter } from 'stream-pipes'
 stream.pipe(createLineWriter()).pipe(createFileWriter('lines.txt'))
 ```
 
-### `createDelimitedParseTransform({ delimiter })`
+### `createDelimitedParseTransform(delimiter, options)`
 Transforms delimited text lines (e.g., CSV) into JavaScript objects using the first line as headers.
 
 ```js
 import { createDelimitedParseTransform } from 'stream-pipes'
 
-const csvParser = createDelimitedParseTransform({ delimiter: ',' })
+const csvParser = createDelimitedParseTransform(',')
 ```
 
-### `createMapTransform(fn)`
+### `createMapTransform(fn, options)`
 Applies a synchronous or asynchronous function fn to each incoming object and pushes the result downstream.
 
 ```js
@@ -122,7 +122,7 @@ const transform = createMapTransform(obj => ({
 }))
 ```
 
-### ` createBatchStream(size)`
+### ` createBatchStream(size, options)`
 
 Groups incoming objects into arrays of fixed size size before pushing them downstream.
 
@@ -131,7 +131,7 @@ import { createBatchStream } from 'stream-pipes'
 
 const batcher = createBatchStream(10)  // emit arrays of 10 objects
 ```
-### `createJsonTransform()`
+### `createJsonTransform(options)`
 Converts each incoming object to a JSON string followed by a newline character (\n), ideal for creating JSON Lines (jsonl) streams.
 
 ```js
@@ -139,7 +139,7 @@ import { createJsonTransform } from 'stream-pipes'
 const jsonStringify = createJsonTransform()
 ```
 
-### `createTapTransform(fn)`
+### `createTapTransform(fn, options)`
 Runs a side-effect function fn on each object passing through, without modifying the data.
 
 ```js

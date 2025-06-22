@@ -2,8 +2,8 @@ import readline from 'readline'
 import { PassThrough, Transform } from 'stream'
 
 export default class LineReader extends Transform {
-  constructor() {
-    super({ objectMode: true })
+  constructor(options = {}) {
+    super({ objectMode: true, ...options })
     this.passThrough = new PassThrough()
     this.rl = readline.createInterface({ input: this.passThrough })
     this.rl.on('line', line => this.processLine(line))

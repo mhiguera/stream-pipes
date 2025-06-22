@@ -1,8 +1,8 @@
 import { Transform } from 'stream'
 
 export default class BatchStream extends Transform {
-  constructor(batchSize = 100) {
-    super({ objectMode: true })
+  constructor(batchSize = 100, options = {}) {
+    super({ objectMode: true, ...options })
     this.batchSize = batchSize
     this.buffer = []
   }

@@ -1,8 +1,8 @@
 import { Transform } from 'stream'
 
 export default class ObjectTransform extends Transform {
-  constructor(transformFunction) {
-    super({ objectMode: true })
+  constructor(transformFunction, options) {
+    super({ objectMode: true, ...options })
     this.transformFunction = transformFunction
     this.providePush = transformFunction.length > 1
   }

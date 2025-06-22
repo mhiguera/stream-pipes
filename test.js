@@ -89,7 +89,7 @@ test('json: output includes newline', async t => {
 
 test('csv: handles delimited parsing', async t => {
   const input = Readable.from(['name,age', 'John,40', 'Jane,30'].join('\n'))
-  const parser = createDelimitedParseTransform({ delimiter: ',' })
+  const parser = createDelimitedParseTransform()
   const result = await collect(input.pipe(parser))
 
   t.deepEqual(result, [
@@ -102,7 +102,7 @@ test('csv: handles delimited parsing', async t => {
 test('full pipeline (string input)', async t => {
   const input = Readable.from(['x,y', '1,2', '3,4'].join('\n'))
   const pipeline = input
-    .pipe(createDelimitedParseTransform({ delimiter: ',' }))
+    .pipe(createDelimitedParseTransform())
     .pipe(createMapTransform(obj => ({ x: Number(obj.x), y: Number(obj.y) })))
     .pipe(createBatchTransform(2))
     .pipe(createJsonTransform())
@@ -196,7 +196,20 @@ test('createJsonTransform should stringify objects', async t => {
 test('createDelimitedParseTransform should parse CSV lines', async t => {
   const lines = ['name,age', 'Alice,30', 'Bob,25'].join('\n')
   const input = Readable.from(lines)
-  const parser = createDelimitedParseTransform({ delimiter: ',' })
+  const parser = createDelimitedParseTransform()
+  const result = await collect(input.pipe(parser))
+
+  t.deepEqual(result, [
+    { name: 'Alice', age: '30' },
+    { name: 'Bob', age: '25' }
+  ])
+  t.end()
+})
+
+test('createDelimitedParseTransform should parse custom separated lines', async t => {
+  const lines = ['name#age', 'Alice#30', 'Bob#25'].join('\n')
+  const input = Readable.from(lines)
+  const parser = createDelimitedParseTransform('#')
   const result = await collect(input.pipe(parser))
 
   t.deepEqual(result, [
@@ -219,7 +232,7 @@ test('Full pipeline from gzipped CSV to jsonl', async t => {
   await finished(outStream)
   await finished(
     createFileReader(file)
-      .pipe(createDelimitedParseTransform({ delimiter: ',' }))
+      .pipe(createDelimitedParseTransform())
       .pipe(createMapTransform(obj => ({ ...obj, age: Number(obj.age) })))
       .pipe(createTapTransform(obj => result.push(obj)))
       .pipe(createBatchTransform(2))

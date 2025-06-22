@@ -1,8 +1,8 @@
 import { Transform } from 'stream'
 
 class TapTransform extends Transform {
-  constructor(sideEffectFn) {
-    super({ objectMode: true })
+  constructor(sideEffectFn, options = {}) {
+    super({ objectMode: true, ...options })
     this.sideEffectFn = sideEffectFn
   }
 

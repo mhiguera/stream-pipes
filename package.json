@@ -19,6 +19,7 @@
     "object-mode",
     "nodejs"
   ],
+  "types": "index.d.ts",
   "author": "Manuel de la Higuera",
   "license": "MIT",
   "repository": {
