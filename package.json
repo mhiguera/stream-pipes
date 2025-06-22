@@ -1,6 +1,6 @@
 {
   "name": "stream-pipes",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Composable and modular stream transforms for Node.js.",
   "main": "index.js",
   "type": "module",
